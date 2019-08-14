@@ -13,6 +13,7 @@ public class PlexManager {
     private PlexAPI api;
 
     private boolean using;
+    private int lastPosition;
 
     public PlexManager() {
 
@@ -23,6 +24,7 @@ public class PlexManager {
         prop.put("username", Listener.getProperties().getProperty("plex-username"));
         prop.put("token", Listener.getProperties().getProperty("plex-token"));
         api = new PlexAPI(prop);
+//        PlexEndpoints.printEndpoint(PlexEndpoints.NOW_PLAYING, null, null);
     }
 
     public void tick() {
@@ -37,7 +39,8 @@ public class PlexManager {
     }
 
     public boolean isPlaying() {
-        return api.getNowPlaying() != null && api.getNowPlaying().size() > 0;
+        if (api.getNowPlaying() == null || api.getNowPlaying().size() == 0) return false;
+        return api.getNowPlaying().get(0).getPlayer().getState().equals("playing");
     }
 
     public void updatePresence() {
@@ -46,8 +49,11 @@ public class PlexManager {
         Episode episode = show.getEpisode(video.getRatingKey());
         String SE = "S" + episode.getSeason().getIndex() + "E" + episode.getIndex();
         SE += " - " + episode.getTitle();
-        PresenceBuilder builder = new PresenceBuilder("plex", (byte) 1, show.getTitle(), SE, "", 0, 0);
-        Listener.getInstance().getPresenceManager().updatePresence(builder.buildPresence());
+        if (lastPosition == 0 || lastPosition != (int) video.getViewOffset() / 1000) {
+            PresenceBuilder builder = new PresenceBuilder("plex", (byte) 1, show.getTitle(), SE, "", (int) Math.floor(video.getDuration() / 1000), (int) video.getViewOffset() / 1000);
+            Listener.getInstance().getPresenceManager().updatePresence(builder.buildPresence());
+            lastPosition = (int) video.getViewOffset() / 1000;
+        }
     }
 
 }

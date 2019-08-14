@@ -16,8 +16,7 @@ public class RichPresenceManager {
 
     public void startRPC() {
         lib = DiscordRPC.INSTANCE;
-        DiscordEventHandlers handlers = new DiscordEventHandlers();
-        lib.Discord_Initialize("463640613850710032", handlers, true, "");
+        lib.Discord_Initialize("463640613850710032", new DiscordEventHandlers(), true, "");
     }
 
     public void updatePresence(DiscordRichPresence presence) {
